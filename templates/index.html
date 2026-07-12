@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Price Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <div class="main-container">
+        <div class="card">
+            <div class="card-header">
+                <h1><i class="fa-solid fa-car-side"></i> Used Car Price Predictor</h1>
+                <p>Enter details below to get the best market value estimate</p>
+            </div>
+            
+            <div class="card-body">
+                <form method="post" accept-charset="utf-8" id="predictorForm">
+                    
+                    <div class="form-group">
+                        <label for="company"><i class="fa-solid fa-building"></i> Select Company</label>
+                        <select id="company" name="company" required onchange="load_car_models(this.id, 'car_models')">
+                            {% for company in companies %}
+                                <option value="{{ company }}">{{ company }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="car_models"><i class="fa-solid fa-list"></i> Select Model</label>
+                        <select id="car_models" name="car_models" required>
+                            <option value="" disabled selected>Select Model</option>
+                            {% for model in car_models %}
+                                <option value="{{ model }}">{{ model }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="year"><i class="fa-solid fa-calendar-days"></i> Year of Manufacture</label>
+                        <select id="year" name="year" required>
+                            <option value="" disabled selected>Select Year</option>
+                            {% for y in years %}
+                                <option value="{{ y }}">{{ y }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fuel_type"><i class="fa-solid fa-gas-pump"></i> Fuel Type</label>
+                        <select id="fuel_type" name="fuel_type" required>
+                            <option value="" disabled selected>Select Fuel Type</option>
+                            {% for fuel in fuel_types %}
+                                <option value="{{ fuel }}">{{ fuel }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="kilo_driven"><i class="fa-solid fa-gauge"></i> Kilometers Driven</label>
+                        <input type="number" id="kilo_driven" name="kilo_driven" placeholder="Enter kms driven (e.g. 45000)" min="0" required>
+                    </div>
+
+                    <button type="button" class="btn-predict" onclick="send_data()">Calculate Price</button>
+                </form>
+
+                <div class="result-section" id="resultContainer" style="display: none;">
+                    <h3>Estimated Valuation</h3>
+                    <div class="price-display" id="predictionResult">₹ 0.00</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function load_car_models(company_id, car_model_id) {
+            var company = document.getElementById(company_id);
+            var car_model = document.getElementById(car_model_id);
+            car_model.value = "";
+            car_model.innerHTML = "<option value='' disabled selected>Select Model</option>";
+
+            {% for company in companies %}
+                if (company.value == "{{ company }}") {
+                    {% for model in car_models %}
+                        {% if company in model %}
+                            var newOption = document.createElement("option");
+                            newOption.value = "{{ model }}";
+                            newOption.innerHTML = "{{ model }}";
+                            car_model.options.add(newOption);
+                        {% endif %}
+                    {% endfor %}
+                }
+            {% endfor %}
+        }
+
+        function send_data() {
+            var form = document.getElementById('predictorForm');
+            
+            // Basic Form Validation Check
+            if(!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            var fd = new FormData(form);
+            var xhr = new XMLHttpRequest();
+            
+            var resultContainer = document.getElementById('resultContainer');
+            var predictionResult = document.getElementById('predictionResult');
+
+            resultContainer.style.display = "block";
+            predictionResult.innerHTML = "Calculating Price... <i class='fa-solid fa-spinner fa-spin'></i>";
+
+            xhr.open('POST', '/predict', true);
+
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == XMLHttpRequest.DONE) {
+                    var finalPrice = parseFloat(xhr.responseText).toLocaleString('en-IN');
+                    predictionResult.innerHTML = "₹ " + finalPrice;
+                }
+            };
+
+            xhr.send(fd);
+        }
+    </script>
+</body>
+</html>

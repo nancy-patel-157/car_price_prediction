@@ -114,7 +114,7 @@ http://127.0.0.1:5000/
 
 ---
 
-## 📈 Future Improvements
+## Future Improvements
 
 - Improve prediction accuracy using advanced regression models
 - Add support for more car brands
@@ -125,7 +125,7 @@ http://127.0.0.1:5000/
 
 ---
 
-## 👩‍💻 Author
+## Author
 
 **Nainsi **
 
@@ -134,6 +134,6 @@ http://127.0.0.1:5000/
 
 ---
 
-## ⭐ Support
+##  Support
 
 If you found this project useful, consider giving it a ⭐ on GitHub.
